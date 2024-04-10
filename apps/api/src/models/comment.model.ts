@@ -1,5 +1,5 @@
-export interface CommentModel {
+export type CommentModel = {
   id: string;
   author: string;
   content: string;
-}
+};
