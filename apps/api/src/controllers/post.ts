@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { PostModel } from '../models';
-import { getCategory } from '../controllers/category.controller';
+import { getCategory } from './category';
+import { customErrorFn } from '../utils/customErrorFn';
 
 const posts: PostModel[] = [];
 
@@ -12,15 +13,19 @@ const getPostIndex = (id: string) => {
   return posts.findIndex((p) => p.id === id);
 };
 
-const getPosts = (req: Request, res: Response) => {
+const postNotFound = () => {
+  throw customErrorFn({ statusCode: 404, message: 'Post not found' });
+};
+
+const getPosts: RequestHandler = (req, res) => {
   res.status(200).json(posts);
 };
 
-const getPostsByCategory = (req: Request, res: Response) => {
+const getPostsByCategory: RequestHandler = (req, res) => {
   const { category } = req.params;
 
   if (!category) {
-    return res.status(400).json({ message: 'Category is required' });
+    throw customErrorFn({ statusCode: 400, message: 'Category is required' });
   }
 
   const postsByCategory = posts.filter((p) => p.category === category);
@@ -28,12 +33,12 @@ const getPostsByCategory = (req: Request, res: Response) => {
   res.status(200).json(postsByCategory);
 };
 
-const getPostById = (req: Request, res: Response) => {
+const getPostById: RequestHandler = (req, res) => {
   const { id } = req.params;
   const post = getPost(id);
 
   if (!post) {
-    return res.status(404).json({ message: 'Post not found' });
+    postNotFound();
   }
 
   const { category } = post;
@@ -47,11 +52,11 @@ const getPostById = (req: Request, res: Response) => {
   res.status(200).json(payloadResponse);
 };
 
-const createPost = (req: Request, res: Response) => {
+const createPost: RequestHandler = (req, res) => {
   const { title } = req.body;
 
   if (!title) {
-    return res.status(400).json({ message: 'Title is required' });
+    throw customErrorFn({ statusCode: 400, message: 'Title is required' });
   }
 
   const newPost = {
@@ -65,18 +70,18 @@ const createPost = (req: Request, res: Response) => {
   res.status(201).json(newPost);
 };
 
-const addComment = (req: Request, res: Response) => {
+const addComment: RequestHandler = (req, res) => {
   const { id } = req.params;
   const postIndex = getPostIndex(id);
 
   if (postIndex === -1) {
-    return res.status(404).json({ message: 'Post not found' });
+    postNotFound();
   }
 
   const { author, content } = req.body;
 
   if (!author || !content) {
-    return res.status(400).json({ message: 'Author and Content are required' });
+    throw customErrorFn({ statusCode: 400, message: 'Author and Content are required' });
   }
 
   const newComment = {
@@ -89,12 +94,12 @@ const addComment = (req: Request, res: Response) => {
   res.status(201).json(newComment);
 };
 
-const updatePost = (req: Request, res: Response) => {
+const updatePost: RequestHandler = (req, res) => {
   const { id } = req.params;
   const postIndex = getPostIndex(id);
 
   if (postIndex === -1) {
-    return res.status(404).json({ message: 'Post not found' });
+    postNotFound();
   }
 
   const updatedPost = { ...posts[postIndex] };
@@ -121,12 +126,12 @@ const updatePost = (req: Request, res: Response) => {
   res.status(200).json(updatedPost);
 };
 
-const deletePost = (req: Request, res: Response) => {
+const deletePost: RequestHandler = (req, res) => {
   const { id } = req.params;
   const postIndex = getPostIndex(id);
 
   if (postIndex === -1) {
-    return res.status(404).json({ message: 'Post not found' });
+    postNotFound();
   }
 
   posts.splice(postIndex, 1);

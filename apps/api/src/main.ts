@@ -2,7 +2,8 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import corsOptions from './config/corsConfig';
-import verifyToken from './middleware/auth.middleware';
+import verifyToken from './middleware/auth';
+import errorHandler from './middleware/errorHandler';
 import categories from './routes/categories';
 import posts from './routes/posts';
 import auth from './routes/auth';
@@ -20,6 +21,7 @@ app.use('/api/auth', auth);
 app.use(verifyToken);
 app.use('/api/categories', categories);
 app.use('/api/posts', posts);
+app.use(errorHandler);
 
 app.listen(port, host, () => {
   console.log(`[ ready ] http://${host}:${port}`);

@@ -1,5 +1,6 @@
-import { Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { Category } from '../models';
+import { customErrorFn } from '../utils/customErrorFn';
 
 const categories: Category[] = [];
 
@@ -11,28 +12,30 @@ const getCategoryIndex = (id: string) => {
   return categories.findIndex((c) => c.id === id);
 };
 
-const notFoundMessage = (res: Response) => res.status(404).json({ message: 'Category not found' });
+const categoryNotFound = () => {
+  throw customErrorFn({ statusCode: 404, message: 'Category not found' });
+};
 
-const getCategories = (req: Request, res: Response) => {
+const getCategories: RequestHandler = (req, res) => {
   res.status(200).json(categories);
 };
 
-const getCategoryById = (req: Request, res: Response) => {
+const getCategoryById: RequestHandler = (req, res) => {
   const { id } = req.params;
   const category = getCategory(id);
 
   if (!category) {
-    return notFoundMessage(res);
+    categoryNotFound();
   }
 
   res.status(200).json(category);
 };
 
-const createCategory = (req: Request, res: Response) => {
+const createCategory: RequestHandler = (req, res) => {
   const { name } = req.body;
 
   if (!name) {
-    return res.status(400).json({ message: 'Name is required' });
+    throw customErrorFn({ statusCode: 400, message: 'Name is required' });
   }
 
   const newCategory = {
@@ -45,12 +48,12 @@ const createCategory = (req: Request, res: Response) => {
   res.status(201).json(newCategory);
 };
 
-const updateCategory = (req: Request, res: Response) => {
+const updateCategory: RequestHandler = (req, res) => {
   const { id } = req.params;
   const categoryIndex = getCategoryIndex(id);
 
   if (categoryIndex === -1) {
-    return notFoundMessage(res);
+    return categoryNotFound();
   }
 
   const updatedCategory = { ...categories[categoryIndex] };
@@ -65,12 +68,12 @@ const updateCategory = (req: Request, res: Response) => {
   res.status(200).json(updatedCategory);
 };
 
-const deleteCategory = (req: Request, res: Response) => {
+const deleteCategory: RequestHandler = (req, res) => {
   const { id } = req.params;
   const categoryIndex = getCategoryIndex(id);
 
   if (categoryIndex === -1) {
-    return notFoundMessage(res);
+    return categoryNotFound();
   }
 
   categories.splice(categoryIndex, 1);

@@ -1,4 +1,4 @@
-import { CommentModel } from './comment.model';
+import { CommentModel } from './comment';
 
 export type PostModel = {
   id: string;
