@@ -1,84 +1,81 @@
 import { RequestHandler } from 'express';
-import { Category } from '../models';
+import mongoose from 'mongoose';
+import Category from '../models/category';
 import { customErrorFn } from '../utils/customErrorFn';
 
-const categories: Category[] = [];
+const categories = [];
 
 export const getCategory = (id: string) => {
   return categories.find((c) => c.id === id);
-};
-
-const getCategoryIndex = (id: string) => {
-  return categories.findIndex((c) => c.id === id);
 };
 
 const categoryNotFound = () => {
   throw customErrorFn({ statusCode: 404, message: 'Category not found' });
 };
 
-const getCategories: RequestHandler = (req, res) => {
-  res.status(200).json(categories);
+const getCategories: RequestHandler = async (req, res, next) => {
+  try {
+    const categories = await Category.find();
+    res.status(200).json(categories);
+  } catch (error) {
+    next(error);
+  }
 };
 
-const getCategoryById: RequestHandler = (req, res) => {
+const getCategoryById: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const category = getCategory(id);
 
-  if (!category) {
-    categoryNotFound();
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw customErrorFn({ statusCode: 404, message: 'Category "id" invalid' });
+    }
+
+    const category = await Category.findById(id);
+
+    if (!category) {
+      categoryNotFound();
+    }
+
+    res.status(200).json(category);
+  } catch (error) {
+    next(error);
   }
-
-  res.status(200).json(category);
 };
 
-const createCategory: RequestHandler = (req, res) => {
-  const { name } = req.body;
-
-  if (!name) {
-    throw customErrorFn({ statusCode: 400, message: 'Name is required' });
+const createCategory: RequestHandler = async (req, res, next) => {
+  try {
+    const category = await Category.create(req.body);
+    res.status(201).json(category);
+  } catch (error) {
+    next(error);
   }
-
-  const newCategory = {
-    id: Date.now().toString(),
-    name
-  };
-
-  categories.push(newCategory);
-
-  res.status(201).json(newCategory);
 };
 
-const updateCategory: RequestHandler = (req, res) => {
+const updateCategory: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const categoryIndex = getCategoryIndex(id);
+  try {
+    const category = await Category.findByIdAndUpdate(id, req.body, { new: true });
 
-  if (categoryIndex === -1) {
-    return categoryNotFound();
+    if (!category) categoryNotFound();
+
+    res.status(200).json(category);
+  } catch (error) {
+    next(error);
   }
-
-  const updatedCategory = { ...categories[categoryIndex] };
-  const { name } = req.body;
-
-  if (name) {
-    updatedCategory.name = name;
-  }
-
-  categories[categoryIndex] = updatedCategory;
-
-  res.status(200).json(updatedCategory);
 };
 
-const deleteCategory: RequestHandler = (req, res) => {
+const deleteCategory: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const categoryIndex = getCategoryIndex(id);
 
-  if (categoryIndex === -1) {
-    return categoryNotFound();
+  try {
+    const category = await Category.findByIdAndDelete(id);
+
+    if (!category) categoryNotFound();
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
   }
-
-  categories.splice(categoryIndex, 1);
-
-  res.status(204).send();
 };
 
 export default { getCategories, getCategoryById, createCategory, updateCategory, deleteCategory };
