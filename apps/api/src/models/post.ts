@@ -23,8 +23,8 @@ const postSchema = new Schema<IPost>({
   title: { type: String, required: [true, 'Title is required'] },
   image: { type: String, required: [true, 'Image is required'] },
   description: { type: String, required: [true, 'Description is required'] },
-  category: { type: Schema.Types.ObjectId, required: [true, 'Category is required'] },
-  comments: [{ type: Schema.Types.ObjectId }]
+  category: { type: Schema.Types.ObjectId, ref: 'Category', required: [true, 'Category is required'] },
+  comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }]
 });
 
 const Post = mongoose.model<IPost>('Post', postSchema);

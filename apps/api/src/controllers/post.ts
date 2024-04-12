@@ -19,7 +19,7 @@ const getPosts: RequestHandler = async (req, res, next) => {
 const getPostsByCategory: RequestHandler = async (req, res, next) => {
   const { category } = req.params;
   try {
-    const postsByCategory = await Post.find({ category }).populate('comments');
+    const postsByCategory = await Post.find({ category }).populate('category').populate('comments');
     if (!postsByCategory) {
       postNotFound();
     }
@@ -32,7 +32,7 @@ const getPostsByCategory: RequestHandler = async (req, res, next) => {
 const getPostById: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const post = await Post.findById(id).populate('comments');
+    const post = await Post.findById(id).populate('category').populate('comments');
     if (!post) {
       postNotFound();
     }
