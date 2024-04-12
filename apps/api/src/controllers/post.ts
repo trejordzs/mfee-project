@@ -1,142 +1,110 @@
 import { RequestHandler } from 'express';
-import { PostModel } from '../models';
-import { getCategory } from './category';
 import { customErrorFn } from '../utils/customErrorFn';
-
-const posts: PostModel[] = [];
-
-const getPost = (id: string) => {
-  return posts.find((p) => p.id === id);
-};
-
-const getPostIndex = (id: string) => {
-  return posts.findIndex((p) => p.id === id);
-};
+import Post, { IPost } from '../models/post';
+import Comment from '../models/comment';
 
 const postNotFound = () => {
   throw customErrorFn({ statusCode: 404, message: 'Post not found' });
 };
 
-const getPosts: RequestHandler = (req, res) => {
-  res.status(200).json(posts);
+const getPosts: RequestHandler = async (req, res, next) => {
+  try {
+    const posts = await Post.find().populate('category');
+    res.status(200).json(posts);
+  } catch (error) {
+    next(error);
+  }
 };
 
-const getPostsByCategory: RequestHandler = (req, res) => {
+const getPostsByCategory: RequestHandler = async (req, res, next) => {
   const { category } = req.params;
-
-  if (!category) {
-    throw customErrorFn({ statusCode: 400, message: 'Category is required' });
+  try {
+    const postsByCategory = await Post.find({ category }).populate('comments');
+    if (!postsByCategory) {
+      postNotFound();
+    }
+    res.status(200).json(postsByCategory);
+  } catch (error) {
+    next(error);
   }
-
-  const postsByCategory = posts.filter((p) => p.category === category);
-
-  res.status(200).json(postsByCategory);
 };
 
-const getPostById: RequestHandler = (req, res) => {
+const getPostById: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const post = getPost(id);
-
-  if (!post) {
-    postNotFound();
+  try {
+    const post = await Post.findById(id).populate('comments');
+    if (!post) {
+      postNotFound();
+    }
+    res.status(200).json(post);
+  } catch (error) {
+    next(error);
   }
-
-  const { category } = post;
-  const categoryInfo = getCategory(category);
-
-  const payloadResponse = {
-    ...post,
-    category: categoryInfo
-  };
-
-  res.status(200).json(payloadResponse);
 };
 
-const createPost: RequestHandler = (req, res) => {
-  const { title } = req.body;
-
-  if (!title) {
-    throw customErrorFn({ statusCode: 400, message: 'Title is required' });
+const createPost: RequestHandler = async (req, res, next) => {
+  try {
+    const newPost = await Post.create({ ...req.body, commemts: [] });
+    res.status(201).json(newPost);
+  } catch (error) {
+    next(error);
   }
-
-  const newPost = {
-    id: Date.now().toString(),
-    ...req.body,
-    comments: []
-  };
-
-  posts.push(newPost);
-
-  res.status(201).json(newPost);
 };
 
-const addComment: RequestHandler = (req, res) => {
+const addComment: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const postIndex = getPostIndex(id);
+  try {
+    const comment = await Comment.create(req.body);
+    const post = await Post.findByIdAndUpdate(id, { $push: { comments: comment._id } }, { new: true });
 
-  if (postIndex === -1) {
-    postNotFound();
+    if (!post) {
+      postNotFound();
+    }
+
+    res.status(201).json(comment);
+  } catch (error) {
+    next(error);
   }
-
-  const { author, content } = req.body;
-
-  if (!author || !content) {
-    throw customErrorFn({ statusCode: 400, message: 'Author and Content are required' });
-  }
-
-  const newComment = {
-    id: Date.now().toString(),
-    ...req.body
-  };
-
-  posts[postIndex].comments.push(newComment);
-
-  res.status(201).json(newComment);
 };
 
-const updatePost: RequestHandler = (req, res) => {
+const updatePost: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const postIndex = getPostIndex(id);
-
-  if (postIndex === -1) {
-    postNotFound();
-  }
-
-  const updatedPost = { ...posts[postIndex] };
   const { title, image, description, category } = req.body;
+  try {
+    const updatedFields: Partial<IPost> = {};
+    if (title) updatedFields.title = title;
+    if (image) updatedFields.image = image;
+    if (description) updatedFields.description = description;
+    if (category) updatedFields.category = category;
 
-  if (title) {
-    updatedPost.title = title;
+    const post = await Post.findByIdAndUpdate(id, updatedFields, { new: true }).populate('comments');
+
+    if (!post) {
+      postNotFound();
+    }
+
+    res.status(200).json(post);
+  } catch (error) {
+    next(error);
   }
-
-  if (image) {
-    updatedPost.title = image;
-  }
-
-  if (description) {
-    updatedPost.description = description;
-  }
-
-  if (category) {
-    updatedPost.category = category;
-  }
-
-  posts[postIndex] = updatedPost;
-
-  res.status(200).json(updatedPost);
 };
 
-const deletePost: RequestHandler = (req, res) => {
+const deletePost: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const postIndex = getPostIndex(id);
+  try {
+    const post = await Post.findById(id).populate('comments');
 
-  if (postIndex === -1) {
-    postNotFound();
+    if (!post) {
+      postNotFound();
+    }
+
+    await Comment.deleteMany({ _id: { $in: post.comments } });
+    await post.deleteOne();
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
   }
-
-  posts.splice(postIndex, 1);
-
-  res.status(204).send();
 };
 
 export default {

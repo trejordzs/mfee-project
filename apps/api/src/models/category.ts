@@ -1,14 +1,14 @@
-import mongoose, { Document, ObjectId, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-interface ICategory extends Document {
+export interface ICategory extends Document {
   name: string;
 }
 
-export const categorySchema = new Schema<ICategory>(
+const categorySchema = new Schema<ICategory>(
   {
     name: {
       type: String,
-      required: [true, 'Property is required']
+      required: [true, 'Name is required']
     }
   },
   {

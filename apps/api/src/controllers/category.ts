@@ -3,12 +3,6 @@ import mongoose from 'mongoose';
 import Category from '../models/category';
 import { customErrorFn } from '../utils/customErrorFn';
 
-const categories = [];
-
-export const getCategory = (id: string) => {
-  return categories.find((c) => c.id === id);
-};
-
 const categoryNotFound = () => {
   throw customErrorFn({ statusCode: 404, message: 'Category not found' });
 };
