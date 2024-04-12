@@ -1,4 +1,4 @@
-import mongose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export type CommentModel = {
   id: string;
@@ -16,6 +16,6 @@ const commentSchema = new Schema<IComment>({
   content: { type: String, required: [true, 'Content is required'] }
 });
 
-const Comment = mongose.model<IComment>('Comment', commentSchema);
+const Comment = mongoose.model<IComment>('Comment', commentSchema);
 
 export default Comment;
