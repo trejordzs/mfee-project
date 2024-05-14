@@ -1,4 +1,4 @@
-import { Title, Container } from "./Comments.styles";
+import { Title, Container, FormContainer } from "./Comments.styles";
 
 function Comments() {
   return (
@@ -6,7 +6,10 @@ function Comments() {
       <Title item sm={8}>
         <h4>Comments</h4>
       </Title>
-      {/* Activity 1 - Render CommentCard */}
+      {/* ACT 1 = Render CommentCard component */}
+      <FormContainer item sm={8}>
+        Form
+      </FormContainer>
     </Container>
   );
 }
