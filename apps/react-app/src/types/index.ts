@@ -24,11 +24,11 @@ export type Comment = {
 };
 
 export interface Alert {
-  severity?: "error" | "warning" | "info" | "success";
+  severity?: 'error' | 'warning' | 'info' | 'success';
   message: string;
 }
 
-export type Order = "asc" | "desc";
+export type Order = 'asc' | 'desc';
 
 export interface TableData {
   [key: string]: string;
@@ -137,4 +137,13 @@ export interface AuthResponse {
 
 export interface AuthLoginResponse {
   accessToken: string;
+}
+
+// This are examples, please delete them when they are unused.
+export interface StateInterface {
+  count: number;
+}
+
+export interface ActionInterface {
+  type: string;
 }
