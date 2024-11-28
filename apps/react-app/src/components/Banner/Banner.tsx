@@ -10,6 +10,7 @@ const postTitle = "UPSKILLING"
 function Banner() {
   return (
     <Container image={postImage}>
+      {/* ACT 3 - Send postImage as image prop to Container component DONE*/}
       <BannerContent>
         <Button sx={{ color: "white" }} startIcon={<ArrowBackIosIcon />}>
           View Posts

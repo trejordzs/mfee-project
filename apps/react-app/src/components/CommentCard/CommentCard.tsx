@@ -3,7 +3,14 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import { Container, Content, Author } from "./CommentCard.styles";
 
-const comment = {
+interface Comment {
+  id: number;
+  author: string;
+  text: string;
+
+}
+
+const commentAuthor = {
   _id: 15555,
   author: "Joseph",
   content: "Content for those in the outside",
@@ -12,15 +19,16 @@ const comment = {
   __v: "release",
 }; // ACT 1 - Fill all the properties with random data DONE
 
-function CommentCard() {
+function CommentCard({ comment }: { comment: Comment }) {
+  const {author, text} = comment
   return (
     <Container item sm={8}>
       <AccountCircleIcon />
       <Content>
         <Author>{/* ACT 1 - Render comment author DONE*/}
-          {comment.author}
+          {author}
         </Author>
-        <Typography>{/* ACT 1 - Render comment content DONE*/}{comment.content}</Typography>
+        <Typography>{/* ACT 1 - Render comment content DONE*/}{text}</Typography>
       </Content>
     </Container>
   );
