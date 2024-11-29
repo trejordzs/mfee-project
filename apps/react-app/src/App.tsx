@@ -10,14 +10,21 @@ import {CategoriesPage} from './components/Page';
 import LoginPage from './components/Page/LoginPage/LoginPage';
 
 function App() {
+
+  const isLoggedIn = true;
+  const showPost = true;
+  const showCategories = true;
+  const postPageContent = isLoggedIn && <LoginPage/>;
   return (
     <Provider store={store}>
       <HomePage />
       {/* ACT 1 - Render PostPage, and CategoriesPage components DONE*/}
-      <PostPage />
-      <CategoriesPage />
       {/* ACT 2 - Move the following content to a new component called LoginPage and render it DONE*/}
-     <LoginPage/>
+      {/* ACT 4 - Add conditions to render PostPage, LoginPage and CategoriesPage components DONE*/}
+      { showPost &&  <PostPage /> }
+      {showCategories ? <CategoriesPage /> : null}
+      {postPageContent}
+     
     </Provider>
   );
 }
