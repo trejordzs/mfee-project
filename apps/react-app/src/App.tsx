@@ -24,7 +24,6 @@ function App() {
       { showPost &&  <PostPage /> }
       {showCategories ? <CategoriesPage /> : null}
       {postPageContent}
-     
     </Provider>
   );
 }

@@ -14,11 +14,10 @@ function Comments() {
       </Title>
       {/* ACT 1 = Render CommentCard component DONE*/}
       {/* ACT 3 - Send one comment (comments[0]) as prop to CommentCard component DONE*/}
-      {/* ACT 5 - Iterate comments to render CommentCard component for each comment */}
+      {/* ACT 5 - Iterate comments to render CommentCard component for each comment DONE*/}
       {comments.map((data) => (
         <CommentCard comment={data} />
       ))}
-      <CommentCard comment={comments[0]}/>
       <FormContainer item sm={8}>
         Form
       </FormContainer>
