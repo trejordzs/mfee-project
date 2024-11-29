@@ -4,10 +4,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Container, Content, Author } from "./CommentCard.styles";
 
 interface Comment {
-  id: number;
   author: string;
   text: string;
-
 }
 
 const commentAuthor = {
